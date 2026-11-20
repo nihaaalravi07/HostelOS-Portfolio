@@ -96,13 +96,12 @@ sequenceDiagram
     MC->>DB: insert booking (BOOKED)
     Note right of DB: no charge yet
     Ms->>MO: POST /api/mess/bookings/{id}/confirm
-    rect rgb(230,237,227)
-    Note over MO,DB: one @Transactional method
+    Note over MO,DB: one @Transactional method begins
     MO->>DB: SELECT ... FOR UPDATE (booking row)
     MO->>MO: booking.markConsumed(): only BOOKED may become CONSUMED
     MO->>LS: postCharge(MESS, "BOOKING-{id}", amount)
-    LS->>DB: look up (module, reference); insert if absent
-    end
+    LS->>DB: look up (module, reference) then insert if absent
+    Note over MO,DB: commit (or roll back all of it)
     Ms->>MO: confirm again
     MO-->>Ms: 409 "Consumption was already confirmed"
 ```
