@@ -1,0 +1,41 @@
+server:
+  port: ${PORT:8080}                      # hosting platforms inject PORT
+  forward-headers-strategy: framework    # trust X-Forwarded-* from the platform's HTTPS proxy
+  shutdown: graceful
+  compression:
+    enabled: true
+    mime-types: text/html,text/css,text/javascript,application/javascript,application/json,image/svg+xml
+spring:
+  application:
+    name: hostelos
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/hostelos}
+    username: ${DB_USER:hostelos}
+    password: ${DB_PASSWORD:hostelos}
+    # (or set one DATABASE_URL=postgresql://user:pass@host/db and it is translated, see DatabaseUrlPostProcessor)
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:5}   # free hosted databases allow few connections
+      minimum-idle: 0                        # keep NO idle connections: lets a scale-to-zero database (Neon) go to sleep
+      idle-timeout: 120000                   # close unused connections after 2 minutes (and do not replace them)
+      max-lifetime: 300000                   # recycle before serverless Postgres drops long-lived connections
+      connection-timeout: 30000              # allow time for a scale-to-zero database to wake up
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+  jackson:
+    default-property-inclusion: non_null
+hostelos:
+  jwt-secret: ${JWT_SECRET}               # REQUIRED, no default: at least 32 characters (generate one with `openssl rand -base64 48`)
+  jwt-expiry-hours: 12
+  demo-mode: ${DEMO_MODE:false}         # true = seed demo data and list demo accounts on the login screen. Never enable on a real deployment
+  demo-password: ${DEMO_PASSWORD:hostelos123}   # password of the seeded demo accounts; used only when demo-mode is true
+  booking-cutoff-minutes: 90             # cutoff = meal start minus this many minutes
+  demo-open-today: true                  # in demo mode, today's meals stay bookable until midnight
+  monthly-room-rent: 3500.00
+  site-passcode: ${SITE_PASSCODE:}       # empty = no gate (local dev). Set it on a public deployment
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html

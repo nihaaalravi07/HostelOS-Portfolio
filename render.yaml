@@ -1,0 +1,22 @@
+# Render Blueprint: one free Docker web service (React + Spring Boot together).
+# The database is NOT created here: use a free Neon Postgres (see DEPLOYMENT.md) and paste its connection string
+# when Render asks for DATABASE_URL. Render's own free Postgres expires after 30 days.
+services:
+  - type: web
+    name: hostelos
+    runtime: docker
+    plan: free
+    region: singapore            # closest Render region to India; cannot be changed later
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /healthz
+    autoDeployTrigger: "off"     # redeploy only when you click "Manual Deploy", so nothing changes before evaluation day
+    envVars:
+      - key: DATABASE_URL        # Neon connection string, e.g. postgresql://user:pass@ep-xxxx.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
+        sync: false
+      - key: SITE_PASSCODE       # the shared passcode teammates type once to get in
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DEMO_MODE
+        value: "true"

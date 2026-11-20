@@ -1,0 +1,20 @@
+# Dependencies and build output
+node_modules/
+dist/
+target/
+backend/src/main/resources/static/
+
+# Environment files: never commit real values, only .env.example
+.env
+.env.*
+!.env.example
+
+# Local tooling and editors
+.neon
+.run/
+.claude/
+.idea/
+.vscode/
+*.iml
+*.log
+.DS_Store

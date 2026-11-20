@@ -1,0 +1,41 @@
+# Local PostgreSQL for development (default), or the WHOLE app in Docker (profile "full").
+#
+#   docker compose up -d                        -> only PostgreSQL on localhost:5432 (run backend/frontend yourself)
+#   docker compose --profile full up --build    -> PostgreSQL + the production image on http://localhost:8080
+#
+# If port 5432 is taken by a local PostgreSQL, run with POSTGRES_PORT=5433.
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: hostelos-db
+    environment:
+      POSTGRES_DB: hostelos
+      POSTGRES_USER: hostelos
+      POSTGRES_PASSWORD: hostelos
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - hostelos-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hostelos -d hostelos"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  app:
+    profiles: ["full"]
+    build: .
+    container_name: hostelos-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://hostelos:hostelos@postgres:5432/hostelos
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET, for example in a .env file (see .env.example)}
+      DEMO_MODE: ${DEMO_MODE:-true}         # local demo data; set to false for anything else
+      # SITE_PASSCODE: choose-a-passcode      # uncomment to require a passcode, like the public deployment
+    ports:
+      - "${APP_PORT:-8080}:8080"
+
+volumes:
+  hostelos-data:

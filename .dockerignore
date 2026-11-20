@@ -1,0 +1,15 @@
+.git
+.claude
+.run
+**/node_modules
+frontend/dist
+backend/target
+**/*.log
+.DS_Store
+.env
+.env.*
+.github
+docs
+evaluation
+**/target
+frontend/dist
